@@ -1,5 +1,6 @@
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.Random;
+import java.util.concurrent.CountDownLatch;
 
 import src.ThreadManager;
 
@@ -9,44 +10,50 @@ public class LargeSum {
     ThreadManager tm = new ThreadManager();
     tm.start();
 
-    double[] lotsaNumbers = new double[100000000];
+    long[] lotsaNumbers = new long[100000000];
+    Random rand = new Random();
     for (int i = 0; i < lotsaNumbers.length; i++) {
-      lotsaNumbers[i] = Math.random() * 10;
+      lotsaNumbers[i] = rand.nextLong();
     }
 
     int step = 50000;
     AtomicLong sum = new AtomicLong(0);
-    AtomicInteger numOps = new AtomicInteger(0);
-    for (int j =0; j < lotsaNumbers.length; j += step) {
+    CountDownLatch latch = new CountDownLatch((lotsaNumbers.length / step));
+    for (int j = 0; j < lotsaNumbers.length; j += step) {
       final int start = j;
       try {
         tm.add(new Runnable() {
           @Override
-          public synchronized void run() {
-            int partialSum = 0;
+          public void run() {
+            long partialSum = 0;
             int end = Math.min(start + step, lotsaNumbers.length);
             // System.out.println("start " + start + "; end " + end);
             for (int k = start; k < end; k++) {
               partialSum += lotsaNumbers[k];
             }
-            // System.out.println("Before: " + sum.get());
-            // System.out.println("After: " + sum.addAndGet(partialSum)); 
             sum.addAndGet(partialSum);
-            numOps.getAndIncrement();
-            if (numOps.get() >= (int) lotsaNumbers.length / step) System.out.println("Final sum: " + sum);
+            latch.countDown();
+            // if (numOps.get() >= (int) lotsaNumbers.length / step)
+            // System.out.println("Final sum: " + sum.get());
           }
         });
       } catch (InterruptedException e) {
         e.printStackTrace();
       }
     }
-    
+
+    try {
+      latch.await();
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+    System.out.println("The fast way: " + sum.get());
+
     long longSum = 0;
-    for (double num : lotsaNumbers) {
+    for (long num : lotsaNumbers) {
       longSum += num;
     }
     System.out.println("The long way: " + longSum);
     System.out.println("Length " + lotsaNumbers.length);
-    System.out.println("Number of operations " + numOps + "; expected " + lotsaNumbers.length / step);
   }
 }

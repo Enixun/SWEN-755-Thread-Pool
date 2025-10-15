@@ -12,16 +12,14 @@ public class ThreadManager {
     q = new LinkedBlockingQueue<Runnable>();
   }
 
-  public synchronized void add(Runnable r) throws InterruptedException {
+  public void add(Runnable r) throws InterruptedException {
     q.put(r);
-    notifyAll();
   }
 
   public void addAll(Collection<Runnable> rs) throws InterruptedException {
-    for (Runnable r: rs) {
+    for (Runnable r : rs) {
       q.put(r);
     }
-    notifyAll();
   }
 
   public void start() {
