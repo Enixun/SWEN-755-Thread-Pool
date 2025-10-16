@@ -13,7 +13,7 @@ public class LargeSum {
     long[] lotsaNumbers = new long[100000000];
     Random rand = new Random();
     for (int i = 0; i < lotsaNumbers.length; i++) {
-      lotsaNumbers[i] = rand.nextLong();
+      lotsaNumbers[i] = rand.nextLong(10);
     }
 
     int step = 50000;
