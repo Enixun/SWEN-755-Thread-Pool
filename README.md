@@ -22,3 +22,8 @@ Ctrl+c to stop the thread pool
 **3\. Sequence diagram :**   
 The process begins with the ThreadManager initializing a central blocking queue and creating a pool of ten worker threads. These threads start up and immediately try to take a task from the queue, but since it’s empty, they all simply wait there, blocked and dormant. Meanwhile, the main client, LargeSum, split its massive workload, summing a huge array into smaller, manageable task chunks. It submits each of these chunks as a Runnable to the ThreadManager, which places them into the queue. As tasks arrive, the waiting threads are automatically activated, each assigned one task from the queue. They execute their specific chunk of the calculation independently, and the key to the pool’s efficiency is what happens next, as soon as a thread finishes its task, it doesn’t shut down but instead goes right back to the queue to wait for the next piece of work. This cycle continues, reusing the same ten threads over and over until all tasks are complete, effectively minimizing the overhead of constantly creating and destroying threads.  
 ![Sequence Diagram](sequence-diagram.png)
+
+
+**4\. Libraries Used :**   
+* java.util.concurrent - for Atomic types and locks
+* java.util.Random - for generating random numbers to add
